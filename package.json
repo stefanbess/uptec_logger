@@ -1,0 +1,27 @@
+{
+  "name": "uptec_logger",
+  "version": "1.0.1",
+  "description": "Module for console logging and log to file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "log",
+    "logger",
+    "up",
+    "tec",
+    "files",
+    "debug",
+    "rotate",
+    "logrotate",
+    "console",
+    "error",
+    "info"
+  ],
+  "author": "Patrick Urlberger | Stefan Dornheim",
+  "license": "ISC",
+  "dependencies": {
+    "get-caller-file": "^2.0.5"
+  }
+}
