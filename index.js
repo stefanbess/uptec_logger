@@ -133,9 +133,9 @@ function DebugLogger(config = {}) {
 
     this.getActivePriority = function(){return active_priority}
 
-    this.getlogRotation = function(){return logRotation}
+    this.getLogRotation = function(){return logRotation}
 
-    this.getmaxFileSize = function(){return maxFileSize}
+    this.getMaxFileSize = function(){return maxFileSize}
 
     this.getLoggerInitialized = function(){return LoggerInitialized}
 
@@ -263,72 +263,71 @@ function DebugLogger(config = {}) {
     }
 
     this.log = function (input,input_prio,options = {}) {
-
-    if(LoggerInitialized){
-        fileLog(input)
-    }
-
-    let off = false
-    if("off" in options){
-        off = options.off
-    }
-
-    let env_priority = priority_options[active_priority];
-    let input_priority;
-
-    if(typeof input_prio == "string"){
-        input_priority = priority_options[input_prio];
-    }
-    else if(typeof input_prio == "number"){
-        input_priority = input_prio
-    }
-    else{
-        input_priority = env_priority
-    }
-
-    if(!off && (input_priority <= env_priority)){
-        const file_parts = getCallerFile().split(path.sep)
-        const file = file_parts[file_parts.length-1]
-        let line
-        try {
-            line = /\((.*):(\d+):(\d+)\)$/.exec(new Error().stack.split("\n")[2])[2];
-        } catch (error) {
-            line = "[unknown]"
+        if(LoggerInitialized){
+            fileLog(input)
         }
 
-        let func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
-        if(func_caller == "" || func_caller == "=>"){func_caller = "[anonymous]"}
-
-        let method = "log"
-
-        if("type" in options){
-            method = options.type
+        let off = false
+        if("off" in options){
+            off = options.off
         }
 
-        let callerinfo = true
-        if("callerinfo" in options){
-            callerinfo = options.callerinfo
+        let env_priority = priority_options[active_priority];
+        let input_priority;
+
+        if(typeof input_prio == "string"){
+            input_priority = priority_options[input_prio];
         }
-
-        if("group" in options){
-            console.group(options.group)
-        }
-
-
-        if("object" in options){
-            console[method](input,options.object)
+        else if(typeof input_prio == "number"){
+            input_priority = input_prio
         }
         else{
-            console[method](input)
+            input_priority = env_priority
         }
-        if(callerinfo){
-            console.log(`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
+
+        if(!off && (input_priority <= env_priority)){
+            const file_parts = getCallerFile().split(path.sep)
+            const file = file_parts[file_parts.length-1]
+            let line
+            try {
+                line = /\((.*):(\d+):(\d+)\)$/.exec(new Error().stack.split("\n")[2])[2];
+            } catch (error) {
+                line = "[unknown]"
+            }
+
+            let func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
+            if(func_caller == "" || func_caller == "=>"){func_caller = "[anonymous]"}
+
+            let method = "log"
+
+            if("type" in options){
+                method = options.type
+            }
+
+            let callerinfo = true
+            if("callerinfo" in options){
+                callerinfo = options.callerinfo
+            }
+
+            if("group" in options){
+                console.group(options.group)
+            }
+
+
+            if("object" in options){
+                console[method](input,options.object)
+            }
+            else{
+                console[method](input)
+            }
+            if(callerinfo){
+                console.log(`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
+            }
+            
+            if("group" in options){
+                console.groupEnd()
+            }
         }
-        
-        if("group" in options){
-            console.groupEnd()
-        }
-    }
     };
 
     this.startGroup = function(name){

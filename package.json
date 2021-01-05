@@ -1,6 +1,6 @@
 {
   "name": "uptec_logger",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Module for console logging and log to file",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "author": "Patrick Urlberger | Stefan Dornheim",
   "license": "ISC",
   "dependencies": {
+    "dayjs": "^1.10.1",
     "get-caller-file": "^2.0.5"
   }
 }
