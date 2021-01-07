@@ -10,8 +10,6 @@ npm i --save uptec_logger
 ```
 const UptecLogger = require('uptec_logger').DebugLogger;
 
-const myLogger = new UptecLogger();
-
 const logger_settings = {
     active_priority: 5,
     priority_options: {
@@ -23,6 +21,8 @@ const logger_settings = {
         "no_logs": 0
     }
 };
+
+const myLogger = new UptecLogger(logger_settings);
 
 myLogger.log('Hello World');
 ```
