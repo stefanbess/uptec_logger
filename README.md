@@ -7,6 +7,8 @@ npm i --save uptec_logger
 
 ## Usage
 
+### Every following Function is also available in a async version
+
 ```
 const UptecLogger = require('uptec_logger').DebugLogger;
 
@@ -24,7 +26,7 @@ const logger_settings = {
 
 const myLogger = new UptecLogger(logger_settings);
 
-myLogger.log('Hello World');
+myLogger.log('Hello World','all_logs',config = {});
 ```
 
 ## Functions
@@ -41,7 +43,10 @@ myLogger.log("Hello World", 5, {
     object: test_object
 });
 ```
-
+### fileLog()
+```
+let myLogger.fileLog("Hello World");
+```
 ### getConfig()
 ```
 let logger_config = myLogger.getConfig();
@@ -82,9 +87,12 @@ myLogger.endGroup();
 
 ### initFileLog()
 ```
-myLogger.initFileLog('Logfolder');
+myLogger.initFileLog('Logfolder',config = {});
 ```
-
+### EndFileLog()
+```
+myLogger.EndFileLog();
+```
 ### setActivePriority()
 ```
 myLogger.setActivePriority(2);
@@ -115,5 +123,6 @@ myLogger.setPriorityOptions({
 ```
 
 ## Changes
+- Jan 08 2021 - Bugfixes / EndFileLog / FileLog Function is Public / AsyncSupport
 - Jan 05 2021 - Bugfixes / Add README
 - Jan 04 2021 - First Version / README to be continued

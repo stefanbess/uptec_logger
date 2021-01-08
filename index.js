@@ -4,7 +4,9 @@ const fs = require('fs');
 const dayjs = require("dayjs")
 
 function DebugLogger(config = {}) {
-    let active_priority = "all"
+
+    //Private Class Parameters
+    let active_priority = "complete"
     let priority_options = {
         "complete": 3,
         "important": 2,
@@ -17,57 +19,8 @@ function DebugLogger(config = {}) {
     let LoggerInitialized = false
     let folderPath = ""
 
-    this.initFileLog = function(folderpath){
-        let success = true;
-        let err = false;
-        try {   
-            LoggerInitialized = true;
-            folderPath = folderpath.toString()
-            !fs.existsSync(folderPath) && fs.mkdirSync(folderPath);
-        } catch (error) {
-            success = false;
-            err = error;
-        }
-        return {
-            success: success,
-            error: err
-        }
-    }
 
-    this.setLogRotation = function(new_rotation){
-        let success = false;
-        let error = false;
-        if (typeof new_rotation == "number" && new_rotation > 0){
-            logRotation = new_rotation;
-            success = true;
-        }
-        else{
-            error = new Error("Invalid Input Type");
-        };
-
-        return {
-            success: success,
-            error: error
-        };
-    }
-
-    this.setMaxFileSize = function(new_filesize){
-        let success = false;
-        let error = false;
-        if (typeof new_filesize == "number" && new_filesize > 0){
-            maxFileSize = new_filesize;
-            success = true;
-        }
-        else{
-            error = new Error("Invalid Input Type");
-        };
-
-        return {
-            success: success,
-            error: error
-        };
-    }
-
+    //private functions
     function sortOptions(options){
         let options_array = []
         Object.entries(options).forEach(option => {
@@ -92,7 +45,8 @@ function DebugLogger(config = {}) {
         return sorted
     }
 
-    function fileLog(input) {
+    function execFileLog(input) {
+        
         let files = fs.readdirSync(folderPath)
         let new_logname = folderPath+"/log_" + dayjs() + ".txt"
         if(files.length == 0){
@@ -129,17 +83,220 @@ function DebugLogger(config = {}) {
         }
     }
 
-    this.getPriorityOptions = function(){return priority_options}
 
-    this.getActivePriority = function(){return active_priority}
+    //public functions (snyc and async)
+    this.fileLog = function(input){
+        let success = true;
+        let err = false;
+        try {
+            execFileLog(input)
+        } catch (error) {
+            success = false;
+            err = error;
+        }
+        return{
+            success: success,
+            error: err
+        }
+    }
 
-    this.getLogRotation = function(){return logRotation}
+    this.fileLogAsync = function(input){
+        let sync = this.fileLog(input)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    } 
 
-    this.getMaxFileSize = function(){return maxFileSize}
+    this.initFileLog = function(folderpath,config = {}){
+        let success = true;
+        let err = false;
+        try {   
+            LoggerInitialized = true;
+            folderPath = folderpath.toString()
+            if(!(folderPath.startsWith("./") || folderPath.startsWith("/"))){
+                folderPath = `./${folderPath}`
+            }
+            !fs.existsSync(folderPath) && fs.mkdirSync(folderPath);
+            if("log_rotation" in config){
+                this.setLogRotation(config.log_rotation);
+            }
+            if("max_filesize" in config){
+                this.setMaxFileSize(config.max_filesize);
+            }
+        } catch (error) {
+            success = false;
+            err = error;
+        }
+        return {
+            success: success,
+            error: err
+        }
+    }
 
-    this.getLoggerInitialized = function(){return LoggerInitialized}
+    this.InitFileLogAsync = function(folderpath,config = {}){
+        let sync = this.initFileLog(folderpath,config)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    } 
+
+    this.endFileLog = function(){
+        let success = true
+        let err = false
+        try {
+            if(LoggerInitialized){
+                LoggerInitialized = false
+            }
+            else{
+                success = false
+                err = new Error("File Logging is not initilazed and can therefore not be ended");
+            }      
+        } catch (error) {
+            err = error
+        }
+        return {
+            success : success,
+            error: err
+        }
+    }
+
+    this.endFileLogAsync = function(){
+        let sync = this.endFileLog()
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
+
+    this.setLogRotation = function(new_rotation){
+        let success = false;
+        let error = false;
+        if (typeof new_rotation == "number" && new_rotation > 0){
+            logRotation = new_rotation;
+            success = true;
+        }
+        else{
+            error = new Error("Invalid Input Type");
+        };
+
+        return {
+            success: success,
+            error: error
+        };
+    }
+
+    this.setLogRotationAsync = function(new_rotation){
+        let sync = this.setLogRotation(new_rotation)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
+
+    this.setMaxFileSize = function(new_filesize){
+        let success = false;
+        let error = false;
+        if (typeof new_filesize == "number" && new_filesize > 0){
+            maxFileSize = new_filesize;
+            success = true;
+        }
+        else{
+            error = new Error("Invalid Input Type");
+        };
+
+        return {
+            success: success,
+            error: error
+        };
+    }
+
+    this.setMaxFileSizeAsync = function(new_filesize){
+        let sync = this.setMaxFileSize(new_filesize)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
 
 
+
+    this.getPriorityOptions = function(){
+        return priority_options
+    }
+
+    this.getPriorityOptionsAsync = function(){
+        try {     
+            let ret = this.getPriorityOptions()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+
+    this.getActivePriority = function(){
+        return active_priority
+    }
+
+    this.getActivePriorityAsync = function(){
+        try {     
+            let ret = this.getActivePriority()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+    this.getLogRotation = function(){
+        return logRotation
+    }
+
+    this.getLogRotationAsync = function(){
+        try {     
+            let ret = this.getLogRotation()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+    this.getMaxFileSize = function(){
+        return maxFileSize
+    }
+
+    this.getMaxFileSizeAsync = function(){
+        try {     
+            let ret = this.getMaxFileSize()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+    this.isLoggerInitialized = function(){
+        return LoggerInitialized
+    }
+
+    this.isLoggerInitializedAsync = function(){
+        try {     
+            let ret = this.isLoggerInitialized()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
 
 
     this.setPriorityOptions = function(new_prioritys,new_active= false){
@@ -195,6 +352,17 @@ function DebugLogger(config = {}) {
         }
     }
 
+    this.setPriorityOptionsAsync = function(new_prioritys,new_active = false){
+        let sync = this.setPriorityOptions(new_prioritys,new_active)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
+
+
     this.setActivePriority = function (new_active){
         try {  
             if(typeof new_active == "string"){
@@ -246,11 +414,15 @@ function DebugLogger(config = {}) {
         }
     }
 
-    let new_prio = config.active_priority|| active_priority;
-    if("priority_options" in config){this.setPriorityOptions(config.priority_options,new_prio)};
-    if("log_rotation" in config){this.setLogRotation(config.log_rotation)};
-    if("max_filesize" in config){this.setMaxFileSize(config.max_filesize)};
-
+    this.setActivePriorityAsync = function(new_active){
+        let sync = this.setActivePriority(new_active)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
 
     this.getConfig = function(){
         return {
@@ -262,79 +434,146 @@ function DebugLogger(config = {}) {
         }
     }
 
+    this.getConfigAsync = function(){
+        try {
+            let ret = this.getConfig()
+            return Promise.resolve(ret)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+      
+    }
+
     this.log = function (input,input_prio,options = {}) {
-        if(LoggerInitialized){
-            fileLog(input)
-        }
-
-        let off = false
-        if("off" in options){
-            off = options.off
-        }
-
-        let env_priority = priority_options[active_priority];
-        let input_priority;
-
-        if(typeof input_prio == "string"){
-            input_priority = priority_options[input_prio];
-        }
-        else if(typeof input_prio == "number"){
-            input_priority = input_prio
-        }
-        else{
-            input_priority = env_priority
-        }
-
-        if(!off && (input_priority <= env_priority)){
-            const file_parts = getCallerFile().split(path.sep)
-            const file = file_parts[file_parts.length-1]
-            let line
-            try {
-                line = /\((.*):(\d+):(\d+)\)$/.exec(new Error().stack.split("\n")[2])[2];
-            } catch (error) {
-                line = "[unknown]"
+        let success = true;
+        let err = false;
+        try {
+            if(LoggerInitialized){
+                execFileLog(input)
             }
-
-            let func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
-            if(func_caller == "" || func_caller == "=>"){func_caller = "[anonymous]"}
-
-            let method = "log"
-
-            if("type" in options){
-                method = options.type
+    
+            let off = false
+            if("off" in options){
+                off = options.off
             }
-
-            let callerinfo = true
-            if("callerinfo" in options){
-                callerinfo = options.callerinfo
+    
+            let env_priority = priority_options[active_priority];
+            let input_priority;
+    
+            if(typeof input_prio == "string"){
+                input_priority = priority_options[input_prio];
             }
-
-            if("group" in options){
-                console.group(options.group)
-            }
-
-
-            if("object" in options){
-                console[method](input,options.object)
+            else if(typeof input_prio == "number"){
+                input_priority = input_prio
             }
             else{
-                console[method](input)
+                input_priority = env_priority
             }
-            if(callerinfo){
-                console.log(`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
+    
+            if(!off && (input_priority <= env_priority)){
+                const file_parts = getCallerFile().split(path.sep)
+                const file = file_parts[file_parts.length-1]
+                let line
+                try {
+                    line = /\((.*):(\d+):(\d+)\)$/.exec(new Error().stack.split("\n")[2])[2];
+                } catch (error) {
+                    line = "[unknown]"
+                }
+    
+                let func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
+                if(func_caller == "" || func_caller == "=>"){func_caller = "[anonymous]"}
+    
+                let method = "log"
+    
+                if("type" in options){
+                    method = options.type
+                }
+    
+                let callerinfo = true
+                if("callerinfo" in options){
+                    callerinfo = options.callerinfo
+                }
+    
+                if("group" in options){
+                    console.group(options.group)
+                }
+    
+    
+                if("object" in options){
+                    console[method](input,options.object)
+                }
+                else{
+                    console[method](input)
+                }
+                if(callerinfo){
+                    console.log(`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
+                }
+                
+                if("group" in options){
+                    console.groupEnd()
+                }
             }
             
-            if("group" in options){
-                console.groupEnd()
-            }
+        } 
+        catch (error) {
+            success = false
+            err = error
+        }
+        return{
+            success: success,
+            error: err
         }
     };
+
+    this.logAsync = function(input,input_prio,options = {}){
+        let sync = this.log(input,input_prio,options)
+        if(sync.success){
+            return Promise.resolve(true)
+        }
+        else{
+            return Promise.reject(sync.error)
+        }
+    }
 
     this.startGroup = function(name){
         console.group(name)
     }
+
+    this.startGroupAsync = function(name){
+        try {
+            this.startGroup(name)
+            return Promise.resolve(true)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
     this.endGroup = function(){
         console.groupEnd()
+    }
+
+    this.endGroupAsync = function(){
+        try {
+            this.endGroupAsync()
+            return Promise.resolve(true)
+        } catch (error) {
+            return Promise.reject(error)
+        }
+    }
+
+    //Constructing Object with given Config
+    let new_prio = config.active_priority|| active_priority;
+    if("priority_options" in config){
+        this.setPriorityOptions(config.priority_options,new_prio);
+    };
+    if("log_rotation" in config){
+        this.setLogRotation(config.log_rotation)
+    };
+    if("max_filesize" in config){
+        this.setMaxFileSize(config.max_filesize)
+    };
+    if("filelog_path" in config){
+        this.initFileLog(config.filelog_path);
     }
 }
 
