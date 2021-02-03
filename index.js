@@ -430,7 +430,7 @@ function DebugLogger(config = {}) {
             priority_options: priority_options,
             logRotation: logRotation,
             maxFileSize: maxFileSize,
-            LoggerInitialized: LoggerInitialized
+            FileLoggerInitialized: LoggerInitialized
         }
     }
 
@@ -506,7 +506,7 @@ function DebugLogger(config = {}) {
                     console[method](input)
                 }
                 if(callerinfo){
-                    console.log(`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
+                    console[method](`-> in function ${func_caller} in file: ${file} at line: ${line} || ${new Date().toLocaleString("en-US")}`)
                 }
                 
                 if("group" in options){
