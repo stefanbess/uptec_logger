@@ -483,7 +483,7 @@ function DebugLogger(config = {}) {
 
                 let func_caller = "";
 
-                if(this.log.hasOwnProperty("caller")){
+                if(this.log.hasOwnProperty("caller") && this.log.caller){
                     func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
                 }
            
