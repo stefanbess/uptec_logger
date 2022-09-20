@@ -479,8 +479,14 @@ function DebugLogger(config = {}) {
                 } catch (error) {
                     line = "[unknown]"
                 }
-    
-                let func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
+
+
+                let func_caller = "";
+
+                if(this.log.hasOwnProperty("caller")){
+                    func_caller = this.log.caller.toString().replace("async ", "").split(" ")[1].split("(")[0]
+                }
+           
                 if(func_caller == "" || func_caller == "=>"){func_caller = "[anonymous]"}
     
                 let method = "log"

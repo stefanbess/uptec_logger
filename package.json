@@ -1,6 +1,6 @@
 {
   "name": "uptec_logger",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Module for console logging and log to file",
   "main": "index.js",
   "scripts": {
